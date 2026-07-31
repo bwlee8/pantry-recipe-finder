@@ -55,7 +55,24 @@ export default function SidebarTabs({
   const [isPanelExpanded, setIsPanelExpanded] = useState(false)
   const [isMobile, setIsMobile] = useState(() => window.matchMedia('(max-width: 860px)').matches)
   const [isScrollingDown, setIsScrollingDown] = useState(false)
+  const [isPastSentinel, setIsPastSentinel] = useState(false)
+  const sentinelRef = useRef(null)
   const lastScrollYRef = useRef(0)
+
+  // Detects when the panel has scrolled to where it would naturally sit —
+  // by watching a marker that sits right before it in normal flow. Below
+  // that point it pins to the top of the viewport; above it, it stays in
+  // flow right under the header subtitle.
+  useEffect(() => {
+    const sentinel = sentinelRef.current
+    if (!sentinel) return undefined
+
+    const observer = new IntersectionObserver(([entry]) => setIsPastSentinel(!entry.isIntersecting), {
+      threshold: 0,
+    })
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [])
 
   // The compact/collapse behavior only makes sense on mobile — desktop
   // keeps the panel fully visible and normally scrollable regardless of
@@ -93,12 +110,12 @@ export default function SidebarTabs({
     return () => window.removeEventListener('scroll', handleScroll)
   }, [isMobile])
 
-  // While the expanded panel is showing as a fixed overlay, freeze the
-  // page underneath it. Without this, selecting a filter/ingredient can
-  // resize the recipe grid below the fold, and the browser's own
-  // scroll-anchoring reacts by jumping the page to an unrelated position.
+  // While the pinned panel is showing as a fixed overlay, freeze the page
+  // underneath it. Without this, selecting a filter/ingredient can resize
+  // the recipe grid below the fold, and the browser's own scroll-anchoring
+  // reacts by jumping the page to an unrelated position.
   useEffect(() => {
-    if (!(isMobile && isPanelExpanded)) return undefined
+    if (!(isMobile && isPastSentinel && isPanelExpanded)) return undefined
 
     const scrollY = window.scrollY
     const { body } = document
@@ -114,7 +131,7 @@ export default function SidebarTabs({
       body.style.right = ''
       window.scrollTo(0, scrollY)
     }
-  }, [isMobile, isPanelExpanded])
+  }, [isMobile, isPastSentinel, isPanelExpanded])
 
   function selectTab(tabId) {
     onTabChange(tabId)
@@ -132,8 +149,9 @@ export default function SidebarTabs({
   }
 
   const isCompactMode = isMobile
+  const isPinned = isMobile && isPastSentinel
   const showFullContent = !isCompactMode || isPanelExpanded
-  const isHeaderHidden = isCompactMode && isScrollingDown && !isMobileMenuOpen
+  const isHeaderHidden = isPinned && isScrollingDown && !isMobileMenuOpen
 
   return (
     <>
@@ -195,9 +213,12 @@ export default function SidebarTabs({
       </div>
 
       <div className="pantry-panel-wrap">
+        <div ref={sentinelRef} className="pantry-panel__sentinel" aria-hidden="true" />
+
         <section
           className="pantry-panel"
           data-compact={isCompactMode ? 'true' : 'false'}
+          data-pinned={isPinned ? 'true' : 'false'}
           data-expanded={isPanelExpanded ? 'true' : 'false'}
           data-header-hidden={isHeaderHidden ? 'true' : 'false'}
           aria-label="Pantry, recipe library, and cooking data"

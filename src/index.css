@@ -95,6 +95,12 @@ input {
   margin: 0 0 0.4rem;
 }
 
+@media (max-width: 860px) {
+  .eyebrow {
+    text-align: center;
+  }
+}
+
 .text-button {
   background: none;
   border: none;
@@ -242,17 +248,18 @@ input {
   .layout {
     display: flex;
     flex-direction: column;
+    align-items: stretch;
     gap: 0;
   }
   .sidebar-tabs-wrap {
     order: 1;
   }
-  .recipe-box__header {
-    order: 2;
-  }
   .pantry-panel-wrap {
-    order: 3;
+    order: 2;
     margin-bottom: 1.5rem;
+  }
+  .recipe-box__header {
+    order: 3;
   }
   .recipe-box {
     order: 4;
@@ -280,6 +287,11 @@ input {
      height — leaving the sticky panel almost no room to stay stuck as
      the much-taller recipe grid scrolls past. */
   align-self: stretch;
+}
+
+.pantry-panel__sentinel {
+  width: 100%;
+  height: 1px;
 }
 
 /* ---------- Pantry panel ---------- */
@@ -362,11 +374,12 @@ input {
     color: var(--color-chalk);
   }
 
-  /* Compact mode takes the panel out of document flow entirely (fixed,
-     not sticky/in-flow) so shrinking it never changes page height — that
-     would clamp scrollY and re-trigger the sentinel, causing an infinite
-     expand/collapse feedback loop. */
-  .pantry-panel[data-compact='true'] {
+  /* Once scrolled past its natural spot, the panel pins to the top of the
+     viewport (fixed, not sticky/in-flow) — same reasoning as the tabs bar:
+     a sticky child confined to its own short wrapper has nowhere to stick.
+     Fixed also means resizing it never changes page height, avoiding the
+     scrollY-clamp feedback loop a sticky/in-flow collapse would cause. */
+  .pantry-panel[data-pinned='true'] {
     position: fixed;
     top: 4rem;
     left: 1.5rem;
@@ -379,18 +392,18 @@ input {
     transition: top 0.25s ease;
   }
 
-  .pantry-panel[data-compact='true'][data-expanded='true'] {
+  .pantry-panel[data-pinned='true'][data-expanded='true'] {
     max-height: calc(100vh - 4rem - 1.5rem);
     overflow-y: auto;
   }
 
-  /* Once the hamburger bar has scrolled out of view, the compact panel
+  /* Once the hamburger bar has scrolled out of view, the pinned panel
      moves up to take the space it vacated instead of leaving a gap. */
-  .pantry-panel[data-compact='true'][data-header-hidden='true'] {
+  .pantry-panel[data-pinned='true'][data-header-hidden='true'] {
     top: 0;
   }
 
-  .pantry-panel[data-compact='true'][data-header-hidden='true'][data-expanded='true'] {
+  .pantry-panel[data-pinned='true'][data-header-hidden='true'][data-expanded='true'] {
     max-height: calc(100vh - 1.5rem);
   }
 }
