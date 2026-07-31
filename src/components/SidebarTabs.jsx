@@ -52,32 +52,15 @@ export default function SidebarTabs({
   statsProps,
 }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [isPastSentinel, setIsPastSentinel] = useState(false)
   const [isPanelExpanded, setIsPanelExpanded] = useState(false)
   const [isMobile, setIsMobile] = useState(() => window.matchMedia('(max-width: 860px)').matches)
   const [isScrollingDown, setIsScrollingDown] = useState(false)
-  const sentinelRef = useRef(null)
   const lastScrollYRef = useRef(0)
-
-  // Detects when the sidebar has scrolled to its sticky position on mobile,
-  // by watching a zero-height marker that sits right before it in normal
-  // flow — the marker (unlike the sticky panel itself) actually leaves the
-  // viewport, which is what tells us the panel is now "stuck".
-  useEffect(() => {
-    const sentinel = sentinelRef.current
-    if (!sentinel) return undefined
-
-    const observer = new IntersectionObserver(([entry]) => setIsPastSentinel(!entry.isIntersecting), {
-      threshold: 0,
-    })
-    observer.observe(sentinel)
-    return () => observer.disconnect()
-  }, [])
 
   // The compact/collapse behavior only makes sense on mobile — desktop
   // keeps the panel fully visible and normally scrollable regardless of
-  // where the sentinel is, so resizing between breakpoints (or scrolling
-  // on desktop) never leaves the sidebar stuck in a collapsed state.
+  // breakpoint, so resizing never leaves the sidebar stuck in a collapsed
+  // state.
   useEffect(() => {
     const mql = window.matchMedia('(max-width: 860px)')
     const handleChange = (event) => setIsMobile(event.matches)
@@ -115,7 +98,7 @@ export default function SidebarTabs({
   // resize the recipe grid below the fold, and the browser's own
   // scroll-anchoring reacts by jumping the page to an unrelated position.
   useEffect(() => {
-    if (!(isMobile && isPastSentinel && isPanelExpanded)) return undefined
+    if (!(isMobile && isPanelExpanded)) return undefined
 
     const scrollY = window.scrollY
     const { body } = document
@@ -131,7 +114,7 @@ export default function SidebarTabs({
       body.style.right = ''
       window.scrollTo(0, scrollY)
     }
-  }, [isMobile, isPastSentinel, isPanelExpanded])
+  }, [isMobile, isPanelExpanded])
 
   function selectTab(tabId) {
     onTabChange(tabId)
@@ -148,7 +131,7 @@ export default function SidebarTabs({
     setIsScrollingDown(false)
   }
 
-  const isCompactMode = isMobile && isPastSentinel
+  const isCompactMode = isMobile
   const showFullContent = !isCompactMode || isPanelExpanded
   const isHeaderHidden = isCompactMode && isScrollingDown && !isMobileMenuOpen
 
@@ -212,8 +195,6 @@ export default function SidebarTabs({
       </div>
 
       <div className="pantry-panel-wrap">
-        <div ref={sentinelRef} className="pantry-panel__sentinel" aria-hidden="true" />
-
         <section
           className="pantry-panel"
           data-compact={isCompactMode ? 'true' : 'false'}

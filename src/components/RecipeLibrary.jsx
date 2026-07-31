@@ -137,8 +137,12 @@ export default function RecipeLibrary({
         <AddRecipeForm onAdd={addRecipe} onCancel={() => setIsAdding(false)} />
       ) : (
         <div className="pantry-panel__footer-row">
-          <button type="button" className="text-button pantry-panel__edit-toggle" onClick={() => setIsAdding(true)}>
-            + Add a recipe
+          <button
+            type="button"
+            className="text-button pantry-panel__edit-toggle"
+            onClick={() => setIsAdding(true)}
+          >
+            <span className="pantry-panel__add-toggle-plus">+</span> Add a recipe
           </button>
           <button type="button" className="text-button pantry-panel__edit-toggle" onClick={() => setIsEditing((current) => !current)}>
             {isEditing ? 'Done editing' : 'Edit'}

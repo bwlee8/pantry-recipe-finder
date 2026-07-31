@@ -165,8 +165,12 @@ export default function PantryPanel({
         <AddIngredientForm existingKeys={existingKeys} onAdd={addIngredient} onCancel={() => setIsAdding(false)} />
       ) : (
         <div className="pantry-panel__footer-row">
-          <button type="button" className="text-button pantry-panel__edit-toggle" onClick={() => setIsAdding(true)}>
-            + Add an ingredient
+          <button
+            type="button"
+            className="text-button pantry-panel__edit-toggle"
+            onClick={() => setIsAdding(true)}
+          >
+            <span className="pantry-panel__add-toggle-plus">+</span> Add an ingredient
           </button>
           <button
             type="button"

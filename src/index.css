@@ -43,7 +43,7 @@
   --color-ink-dim: #6b6255;
   --color-chalk: #f2ece0;
   --color-chalk-dim: #b3a999;
-  --color-mustard: #d3902f;
+  --color-mustard: #b5606f;
   --color-brick: #c1432b;
   --color-sage: #7fa06e;
   --color-stamp-partial: #9c8465;
@@ -90,6 +90,7 @@ input {
   text-transform: uppercase;
   letter-spacing: 0.12em;
   font-size: 0.75rem;
+  font-weight: 800;
   color: var(--color-mustard);
   margin: 0 0 0.4rem;
 }
@@ -133,6 +134,10 @@ input {
   margin-bottom: 0;
 }
 
+.pantry-panel__add-toggle-plus {
+  text-decoration: none;
+}
+
 /* ---------- Shell & layout ---------- */
 
 .app-shell {
@@ -163,7 +168,7 @@ input {
 }
 
 .app-header__subtitle {
-  color: #d3902f;
+  color: #b5606f;
   margin: 0 0 1.5rem;
   font-size: 0.95rem;
 }
@@ -189,7 +194,7 @@ input {
   bottom: 0.3rem;
   left: 0.3rem;
   width: calc(50% - 0.3rem);
-  background: var(--color-mustard);
+  background: var(--color-bg-alt);
   border-radius: 999px;
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -213,7 +218,7 @@ input {
   transition: color 0.2s ease;
 }
 .section-toggle__option[data-active='true'] {
-  color: var(--color-ink);
+  color: var(--color-chalk);
   font-weight: 600;
 }
 
@@ -257,7 +262,15 @@ input {
 /* ---------- Sidebar tabs / pantry panel grid wrappers ---------- */
 
 .sidebar-tabs-wrap {
-  grid-area: tabs;
+  /* `display: contents` drops the wrapper's own box so `.sidebar-tabs`
+     becomes a direct child of `.layout` for containing-block purposes —
+     `.layout` is already tall enough for sticky to have real "room" to
+     stay stuck. (Spanning grid rows instead, as `.pantry-panel-wrap`
+     does, corrupted row 1's own auto-sizing here and made it overlap
+     `.recipe-box__header`; contents is safe for this wrapper only
+     because, unlike the pantry panel, nothing inside it depends on
+     IntersectionObserver.) */
+  display: contents;
 }
 
 .pantry-panel-wrap {
@@ -269,11 +282,6 @@ input {
   align-self: stretch;
 }
 
-.pantry-panel__sentinel {
-  width: 100%;
-  height: 1px;
-}
-
 /* ---------- Pantry panel ---------- */
 
 .pantry-panel {
@@ -282,12 +290,12 @@ input {
   border-radius: var(--radius-card);
   padding: 1.5rem;
   position: sticky;
-  top: 2.4375rem;
-  max-height: calc(100vh - 2.4375rem - 1.5rem);
+  top: 4.9375rem;
+  max-height: calc(100vh - 4.9375rem - 1.5rem);
   overflow-y: auto;
   overscroll-behavior: none;
   scrollbar-width: thin;
-  scrollbar-color: #d3902f transparent;
+  scrollbar-color: #b5606f transparent;
 }
 
 .pantry-panel::-webkit-scrollbar {
@@ -298,7 +306,7 @@ input {
   margin: 12px 0;
 }
 .pantry-panel::-webkit-scrollbar-thumb {
-  background-color: #d3902f;
+  background-color: #b5606f;
   border-radius: 0;
 }
 
@@ -518,6 +526,7 @@ input {
 /* ---------- Sidebar tabs ---------- */
 
 .sidebar-tabs {
+  grid-area: tabs;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
@@ -575,6 +584,7 @@ input {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-size: 0.75rem;
+  font-weight: 800;
   padding: 0 0 0.75rem;
   margin-bottom: -1px;
   cursor: pointer;
@@ -593,6 +603,7 @@ input {
      the entire scroll — sticky would only hold for as long as its own
      short wrapper box, which unsticks almost immediately. */
   .sidebar-tabs-wrap {
+    display: block;
     position: fixed;
     top: 0;
     left: 0;
@@ -815,8 +826,8 @@ input {
 
 .favorite-toggle__icon {
   display: block;
-  width: 1.3em;
-  height: 1.05em;
+  width: 1.15em;
+  height: 0.93em;
   fill: none;
   stroke: currentColor;
   stroke-width: 2.5;
