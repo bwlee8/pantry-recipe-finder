@@ -305,35 +305,11 @@ export default function App() {
         </p>
       </header>
 
-      <div className="section-toggle" data-active={section} role="tablist" aria-label="Food or drinks">
-        <div className="section-toggle__pill">
-          <div className="section-toggle__indicator" />
-          <button
-            type="button"
-            role="tab"
-            aria-selected={section === 'food'}
-            className="section-toggle__option"
-            data-active={section === 'food' ? 'true' : 'false'}
-            onClick={() => changeSection('food')}
-          >
-            Food
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={section === 'drink'}
-            className="section-toggle__option"
-            data-active={section === 'drink' ? 'true' : 'false'}
-            onClick={() => changeSection('drink')}
-          >
-            Drinks
-          </button>
-        </div>
-      </div>
-
       <main className="layout">
         <SidebarTabs
           activeTab={sidebarTab}
+          section={section}
+          onSectionChange={changeSection}
           onTabChange={setSidebarTab}
           recipeLibraryProps={{
             recipes,

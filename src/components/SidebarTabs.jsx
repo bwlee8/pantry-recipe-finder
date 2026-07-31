@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react'
 import PantryPanel from './PantryPanel.jsx'
 import RecipeLibrary from './RecipeLibrary.jsx'
 import FavoritesSidebar from './FavoritesSidebar.jsx'
@@ -10,68 +11,243 @@ const TABS = [
   { id: 'stats', label: 'Data' },
 ]
 
+function SectionToggle({ section, onSectionChange }) {
+  return (
+    <div className="section-toggle" data-active={section} role="tablist" aria-label="Food or drinks">
+      <div className="section-toggle__pill">
+        <div className="section-toggle__indicator" />
+        <button
+          type="button"
+          role="tab"
+          aria-selected={section === 'food'}
+          className="section-toggle__option"
+          data-active={section === 'food' ? 'true' : 'false'}
+          onClick={() => onSectionChange('food')}
+        >
+          Food
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={section === 'drink'}
+          className="section-toggle__option"
+          data-active={section === 'drink' ? 'true' : 'false'}
+          onClick={() => onSectionChange('drink')}
+        >
+          Drinks
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export default function SidebarTabs({
   activeTab,
   onTabChange,
+  section,
+  onSectionChange,
   recipeLibraryProps,
   pantryPanelProps,
   favoritesSidebarProps,
   statsProps,
 }) {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isPastSentinel, setIsPastSentinel] = useState(false)
+  const [isPanelExpanded, setIsPanelExpanded] = useState(false)
+  const [isMobile, setIsMobile] = useState(() => window.matchMedia('(max-width: 860px)').matches)
+  const [isScrollingDown, setIsScrollingDown] = useState(false)
+  const sentinelRef = useRef(null)
+  const lastScrollYRef = useRef(0)
+
+  // Detects when the sidebar has scrolled to its sticky position on mobile,
+  // by watching a zero-height marker that sits right before it in normal
+  // flow — the marker (unlike the sticky panel itself) actually leaves the
+  // viewport, which is what tells us the panel is now "stuck".
+  useEffect(() => {
+    const sentinel = sentinelRef.current
+    if (!sentinel) return undefined
+
+    const observer = new IntersectionObserver(([entry]) => setIsPastSentinel(!entry.isIntersecting), {
+      threshold: 0,
+    })
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [])
+
+  // The compact/collapse behavior only makes sense on mobile — desktop
+  // keeps the panel fully visible and normally scrollable regardless of
+  // where the sentinel is, so resizing between breakpoints (or scrolling
+  // on desktop) never leaves the sidebar stuck in a collapsed state.
+  useEffect(() => {
+    const mql = window.matchMedia('(max-width: 860px)')
+    const handleChange = (event) => setIsMobile(event.matches)
+    mql.addEventListener('change', handleChange)
+    return () => mql.removeEventListener('change', handleChange)
+  }, [])
+
+  // Once the pantry section has collapsed, scrolling further down hides the
+  // hamburger bar and scrolling back up brings it back — same idea as the
+  // panel's own compact state, just tracking scroll direction instead of
+  // scroll position.
+  useEffect(() => {
+    if (!isMobile) {
+      setIsScrollingDown(false)
+      return undefined
+    }
+
+    lastScrollYRef.current = window.scrollY
+
+    function handleScroll() {
+      const currentScrollY = window.scrollY
+      const delta = currentScrollY - lastScrollYRef.current
+      if (Math.abs(delta) > 4) {
+        setIsScrollingDown(delta > 0)
+        lastScrollYRef.current = currentScrollY
+      }
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [isMobile])
+
+  function selectTab(tabId) {
+    onTabChange(tabId)
+    setIsMobileMenuOpen(false)
+  }
+
+  function selectSection(nextSection) {
+    onSectionChange(nextSection)
+    setIsMobileMenuOpen(false)
+  }
+
+  function toggleMobileMenu() {
+    setIsMobileMenuOpen((current) => !current)
+    setIsScrollingDown(false)
+  }
+
+  const isCompactMode = isMobile && isPastSentinel
+  const showFullContent = !isCompactMode || isPanelExpanded
+  const isHeaderHidden = isCompactMode && isScrollingDown && !isMobileMenuOpen
+
   return (
     <>
-      <div className="sidebar-tabs" role="tablist" aria-label="Sidebar sections">
-        {TABS.map((tab) => (
+      <div className="sidebar-tabs-wrap" data-hidden={isHeaderHidden ? 'true' : 'false'}>
+        <div className="sidebar-tabs" role="tablist" aria-label="Sidebar sections">
+          <div className="sidebar-tabs__group">
+            {TABS.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                role="tab"
+                id={`sidebar-tab-${tab.id}`}
+                aria-selected={activeTab === tab.id}
+                aria-controls={`sidebar-panel-${tab.id}`}
+                className="sidebar-tabs__tab"
+                data-active={activeTab === tab.id ? 'true' : 'false'}
+                onClick={() => onTabChange(tab.id)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          <SectionToggle section={section} onSectionChange={onSectionChange} />
+
           <button
-            key={tab.id}
             type="button"
-            role="tab"
-            id={`sidebar-tab-${tab.id}`}
-            aria-selected={activeTab === tab.id}
-            aria-controls={`sidebar-panel-${tab.id}`}
-            className="sidebar-tabs__tab"
-            data-active={activeTab === tab.id ? 'true' : 'false'}
-            onClick={() => onTabChange(tab.id)}
+            className="sidebar-tabs__menu-toggle"
+            aria-expanded={isMobileMenuOpen}
+            aria-label="Menu"
+            onClick={toggleMobileMenu}
           >
-            {tab.label}
+            <span />
+            <span />
+            <span />
           </button>
-        ))}
+        </div>
+
+        <div className="collapsible sidebar-tabs__mobile-menu" data-open={isMobileMenuOpen ? 'true' : 'false'}>
+          <div className="collapsible__inner">
+            <SectionToggle section={section} onSectionChange={selectSection} />
+            <div className="sidebar-tabs__mobile-list" role="tablist" aria-label="Sidebar sections">
+              {TABS.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={activeTab === tab.id}
+                  className="sidebar-tabs__tab sidebar-tabs__tab--mobile"
+                  data-active={activeTab === tab.id ? 'true' : 'false'}
+                  onClick={() => selectTab(tab.id)}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
 
-      <section className="pantry-panel" aria-label="Pantry, recipe library, and cooking data">
-        <div
-          id="sidebar-panel-ingredients"
-          role="tabpanel"
-          aria-labelledby="sidebar-tab-ingredients"
-          hidden={activeTab !== 'ingredients'}
+      <div className="pantry-panel-wrap">
+        <div ref={sentinelRef} className="pantry-panel__sentinel" aria-hidden="true" />
+
+        <section
+          className="pantry-panel"
+          data-compact={isCompactMode ? 'true' : 'false'}
+          data-expanded={isPanelExpanded ? 'true' : 'false'}
+          aria-label="Pantry, recipe library, and cooking data"
         >
-          {activeTab === 'ingredients' && <PantryPanel {...pantryPanelProps} />}
-        </div>
-        <div
-          id="sidebar-panel-recipes"
-          role="tabpanel"
-          aria-labelledby="sidebar-tab-recipes"
-          hidden={activeTab !== 'recipes'}
-        >
-          {activeTab === 'recipes' && <RecipeLibrary {...recipeLibraryProps} />}
-        </div>
-        <div
-          id="sidebar-panel-favorites"
-          role="tabpanel"
-          aria-labelledby="sidebar-tab-favorites"
-          hidden={activeTab !== 'favorites'}
-        >
-          {activeTab === 'favorites' && <FavoritesSidebar {...favoritesSidebarProps} />}
-        </div>
-        <div
-          id="sidebar-panel-stats"
-          role="tabpanel"
-          aria-labelledby="sidebar-tab-stats"
-          hidden={activeTab !== 'stats'}
-        >
-          {activeTab === 'stats' && <StatsSidebar {...statsProps} />}
-        </div>
-      </section>
+          {isCompactMode && (
+            <button
+              type="button"
+              className="pantry-panel__compact-bar"
+              aria-expanded={isPanelExpanded}
+              onClick={() => setIsPanelExpanded((current) => !current)}
+            >
+              <span>The Pantry</span>
+              <span className="pantry-panel__compact-chevron" data-open={isPanelExpanded ? 'true' : 'false'}>
+                ▾
+              </span>
+            </button>
+          )}
+          <div className="collapsible pantry-panel__body" data-open={showFullContent ? 'true' : 'false'}>
+            <div className="collapsible__inner">
+              <div
+                id="sidebar-panel-ingredients"
+                role="tabpanel"
+                aria-labelledby="sidebar-tab-ingredients"
+                hidden={activeTab !== 'ingredients'}
+              >
+                {activeTab === 'ingredients' && <PantryPanel {...pantryPanelProps} />}
+              </div>
+              <div
+                id="sidebar-panel-recipes"
+                role="tabpanel"
+                aria-labelledby="sidebar-tab-recipes"
+                hidden={activeTab !== 'recipes'}
+              >
+                {activeTab === 'recipes' && <RecipeLibrary {...recipeLibraryProps} />}
+              </div>
+              <div
+                id="sidebar-panel-favorites"
+                role="tabpanel"
+                aria-labelledby="sidebar-tab-favorites"
+                hidden={activeTab !== 'favorites'}
+              >
+                {activeTab === 'favorites' && <FavoritesSidebar {...favoritesSidebarProps} />}
+              </div>
+              <div
+                id="sidebar-panel-stats"
+                role="tabpanel"
+                aria-labelledby="sidebar-tab-stats"
+                hidden={activeTab !== 'stats'}
+              >
+                {activeTab === 'stats' && <StatsSidebar {...statsProps} />}
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
     </>
   )
 }
