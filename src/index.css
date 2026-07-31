@@ -336,6 +336,24 @@ input {
     transform: rotate(180deg);
   }
 
+  .pantry-panel__collapse-bar {
+    width: 100%;
+    margin-top: 1.5rem;
+    padding: 0.85rem 0;
+    background: none;
+    border: none;
+    border-top: 1px solid rgba(242, 236, 224, 0.15);
+    color: var(--color-chalk-dim);
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.75rem;
+    cursor: pointer;
+  }
+  .pantry-panel__collapse-bar:hover {
+    color: var(--color-chalk);
+  }
+
   /* Compact mode takes the panel out of document flow entirely (fixed,
      not sticky/in-flow) so shrinking it never changes page height — that
      would clamp scrollY and re-trigger the sentinel, causing an infinite
@@ -350,11 +368,22 @@ input {
     padding: 0.85rem 1.5rem;
     z-index: 15;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: top 0.25s ease;
   }
 
   .pantry-panel[data-compact='true'][data-expanded='true'] {
     max-height: calc(100vh - 4rem - 1.5rem);
     overflow-y: auto;
+  }
+
+  /* Once the hamburger bar has scrolled out of view, the compact panel
+     moves up to take the space it vacated instead of leaving a gap. */
+  .pantry-panel[data-compact='true'][data-header-hidden='true'] {
+    top: 0;
+  }
+
+  .pantry-panel[data-compact='true'][data-header-hidden='true'][data-expanded='true'] {
+    max-height: calc(100vh - 1.5rem);
   }
 }
 

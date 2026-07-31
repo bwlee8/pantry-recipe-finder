@@ -110,6 +110,29 @@ export default function SidebarTabs({
     return () => window.removeEventListener('scroll', handleScroll)
   }, [isMobile])
 
+  // While the expanded panel is showing as a fixed overlay, freeze the
+  // page underneath it. Without this, selecting a filter/ingredient can
+  // resize the recipe grid below the fold, and the browser's own
+  // scroll-anchoring reacts by jumping the page to an unrelated position.
+  useEffect(() => {
+    if (!(isMobile && isPastSentinel && isPanelExpanded)) return undefined
+
+    const scrollY = window.scrollY
+    const { body } = document
+    body.style.position = 'fixed'
+    body.style.top = `-${scrollY}px`
+    body.style.left = '0'
+    body.style.right = '0'
+
+    return () => {
+      body.style.position = ''
+      body.style.top = ''
+      body.style.left = ''
+      body.style.right = ''
+      window.scrollTo(0, scrollY)
+    }
+  }, [isMobile, isPastSentinel, isPanelExpanded])
+
   function selectTab(tabId) {
     onTabChange(tabId)
     setIsMobileMenuOpen(false)
@@ -195,6 +218,7 @@ export default function SidebarTabs({
           className="pantry-panel"
           data-compact={isCompactMode ? 'true' : 'false'}
           data-expanded={isPanelExpanded ? 'true' : 'false'}
+          data-header-hidden={isHeaderHidden ? 'true' : 'false'}
           aria-label="Pantry, recipe library, and cooking data"
         >
           {isCompactMode && (
@@ -244,6 +268,11 @@ export default function SidebarTabs({
               >
                 {activeTab === 'stats' && <StatsSidebar {...statsProps} />}
               </div>
+              {isCompactMode && isPanelExpanded && (
+                <button type="button" className="pantry-panel__collapse-bar" onClick={() => setIsPanelExpanded(false)}>
+                  Collapse ▴
+                </button>
+              )}
             </div>
           </div>
         </section>
