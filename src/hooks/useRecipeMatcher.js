@@ -1,11 +1,15 @@
 import { useMemo } from 'react'
 
 // Scores each recipe by how many of its ingredients are in `selectedIngredients`.
-// Returns only recipes with at least one match, sorted best-match first.
-// Pass onlyFullMatches: true to keep just the recipes you can make right now.
-export function useRecipeMatcher(recipes, selectedIngredients, { onlyFullMatches = false } = {}) {
+// With nothing selected, every recipe is returned (score 0) so the box lists
+// the whole library; once ingredients are picked, only recipes with at least
+// one match remain, sorted best-match first. Full-match-only and other
+// display filters are applied downstream so the underlying list (and the
+// filter controls themselves) stay available even when a filter zeroes out
+// what's shown.
+export function useRecipeMatcher(recipes, selectedIngredients) {
   return useMemo(() => {
-    if (selectedIngredients.size === 0) return []
+    const hasSelection = selectedIngredients.size > 0
 
     const scored = recipes
       .map((recipe) => {
@@ -19,8 +23,7 @@ export function useRecipeMatcher(recipes, selectedIngredients, { onlyFullMatches
           matchPercent: matched.length / recipe.ingredients.length,
         }
       })
-      .filter((entry) => entry.matchedCount > 0)
-      .filter((entry) => !onlyFullMatches || entry.missing.length === 0)
+      .filter((entry) => !hasSelection || entry.matchedCount > 0)
 
     scored.sort((a, b) => {
       if (b.matchPercent !== a.matchPercent) return b.matchPercent - a.matchPercent
@@ -29,5 +32,5 @@ export function useRecipeMatcher(recipes, selectedIngredients, { onlyFullMatches
     })
 
     return scored
-  }, [recipes, selectedIngredients, onlyFullMatches])
+  }, [recipes, selectedIngredients])
 }

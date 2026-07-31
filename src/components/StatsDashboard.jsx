@@ -3,7 +3,7 @@ import { formatIngredientLabel } from '../data/recipes.js'
 
 export default function StatsDashboard({ cookLog }) {
   return (
-    <section className="recipe-box" aria-label="Cooking stats">
+    <>
       <div className="recipe-box__header">
         <div>
           <p className="eyebrow">The Data</p>
@@ -11,6 +11,7 @@ export default function StatsDashboard({ cookLog }) {
         </div>
       </div>
 
+      <section className="recipe-box" aria-label="Cooking stats">
       {cookLog.length === 0 ? (
         <p className="empty-state">
           Mark a recipe as cooked from its detail page to start tracking your stats.
@@ -41,6 +42,7 @@ export default function StatsDashboard({ cookLog }) {
           })}
         </div>
       )}
-    </section>
+      </section>
+    </>
   )
 }

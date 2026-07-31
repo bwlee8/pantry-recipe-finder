@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-export default function AddIngredientForm({ existingKeys, onAdd }) {
+export default function AddIngredientForm({ existingKeys, onAdd, onCancel }) {
   const [value, setValue] = useState('')
   const [error, setError] = useState('')
 
@@ -25,24 +25,29 @@ export default function AddIngredientForm({ existingKeys, onAdd }) {
   }
 
   return (
-    <form className="add-ingredient-form" onSubmit={handleSubmit}>
+    <form className="add-recipe-form" onSubmit={handleSubmit}>
       <label htmlFor="new-ingredient" className="add-ingredient-form__label">
-        Add an ingredient
+        Ingredient name
       </label>
-      <div className="add-ingredient-form__row">
-        <input
-          id="new-ingredient"
-          type="text"
-          placeholder="e.g. smoked paprika"
-          value={value}
-          onChange={(event) => {
-            setValue(event.target.value)
-            if (error) setError('')
-          }}
-        />
-        <button type="submit">Add</button>
-      </div>
+      <input
+        id="new-ingredient"
+        type="text"
+        placeholder="e.g. smoked paprika"
+        value={value}
+        onChange={(event) => {
+          setValue(event.target.value)
+          if (error) setError('')
+        }}
+      />
+
       {error && <p className="add-ingredient-form__error">{error}</p>}
+
+      <div className="add-recipe-form__actions">
+        <button type="button" className="text-button" onClick={onCancel}>
+          Cancel
+        </button>
+        <button type="submit">Add ingredient</button>
+      </div>
     </form>
   )
 }

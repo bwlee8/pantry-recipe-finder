@@ -1,8 +1,9 @@
 import { formatIngredientLabel } from '../data/recipes.js'
+import FavoriteButton from './FavoriteButton.jsx'
 
-export default function RecipeDetail({ recipe, cookCount, onMarkCooked }) {
+export default function RecipeDetail({ recipe, cookCount, onMarkCooked, isFavorited, onToggleFavorite }) {
   return (
-    <section className="recipe-box" aria-label="Recipe detail">
+    <>
       <div className="recipe-box__header">
         <div>
           <p className="eyebrow">The Recipe Library</p>
@@ -10,6 +11,7 @@ export default function RecipeDetail({ recipe, cookCount, onMarkCooked }) {
         </div>
       </div>
 
+      <section className="recipe-box" aria-label="Recipe detail">
       {!recipe && (
         <p className="empty-state">Pick a recipe from the list on the left to see it here.</p>
       )}
@@ -22,7 +24,10 @@ export default function RecipeDetail({ recipe, cookCount, onMarkCooked }) {
             <span className="recipe-detail__image-placeholder">No photo yet</span>
           )}
           <div className="recipe-detail__body">
-            <h3 className="recipe-detail__name">{recipe.name}</h3>
+            <div className="recipe-detail__name-row">
+              <h3 className="recipe-detail__name">{recipe.name}</h3>
+              <FavoriteButton isFavorited={isFavorited} onToggle={onToggleFavorite} label={recipe.name} />
+            </div>
             <p className="recipe-detail__meta">
               {recipe.category} &middot; {recipe.time} min &middot; serves {recipe.servings}
             </p>
@@ -65,6 +70,7 @@ export default function RecipeDetail({ recipe, cookCount, onMarkCooked }) {
           </div>
         </article>
       )}
-    </section>
+      </section>
+    </>
   )
 }

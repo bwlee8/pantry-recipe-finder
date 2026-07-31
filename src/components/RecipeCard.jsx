@@ -1,4 +1,5 @@
 import { formatIngredientLabel } from '../data/recipes.js'
+import FavoriteButton from './FavoriteButton.jsx'
 
 export default function RecipeCard({
   recipe,
@@ -8,8 +9,8 @@ export default function RecipeCard({
   isSelected,
   onSelect,
   onToggleIngredient,
-  cookCount,
-  onMarkCooked,
+  isFavorited,
+  onToggleFavorite,
 }) {
   const isFullMatch = missing.length === 0
   const missingSet = new Set(missing.map((ingredient) => ingredient.key))
@@ -17,11 +18,6 @@ export default function RecipeCard({
   function handleIngredientClick(event, key) {
     event.stopPropagation()
     onToggleIngredient(key)
-  }
-
-  function handleMarkCooked(event) {
-    event.stopPropagation()
-    onMarkCooked(recipe)
   }
 
   function handleKeyDown(event) {
@@ -48,7 +44,10 @@ export default function RecipeCard({
       )}
 
       <div className="recipe-card__body">
-        <h3 className="recipe-card__name">{recipe.name}</h3>
+        <div className="recipe-card__name-row">
+          <h3 className="recipe-card__name">{recipe.name}</h3>
+          <FavoriteButton isFavorited={isFavorited} onToggle={() => onToggleFavorite(recipe.id)} label={recipe.name} />
+        </div>
         <p className="recipe-card__submeta">
           {recipe.time} min &middot; serves {recipe.servings}
         </p>
@@ -56,17 +55,6 @@ export default function RecipeCard({
         <p className="recipe-card__meta">
           {matchedCount}/{totalCount} matched &middot; {isFullMatch ? 'Ready to cook' : `Needs ${missing.length} more`}
         </p>
-
-        {isSelected && (
-          <div className="recipe-card__cook-row">
-            <button type="button" className="recipe-card__mark-cooked" onClick={handleMarkCooked}>
-              I just cooked this
-            </button>
-            <span className="recipe-card__cook-count">
-              {cookCount === 0 ? 'Not cooked yet' : `Cooked ${cookCount} time${cookCount === 1 ? '' : 's'}`}
-            </span>
-          </div>
-        )}
 
         <div className="recipe-card__ingredients">
           {recipe.ingredients.map((ingredient) => (
@@ -83,43 +71,14 @@ export default function RecipeCard({
           ))}
         </div>
 
-        {isSelected ? (
-          <div className="recipe-card__steps">
-            <p className="recipe-card__steps-title">Steps</p>
-            <ol>
-              {recipe.steps.map((step, index) => (
-                <li key={index}>{step}</li>
-              ))}
-            </ol>
-          </div>
-        ) : (
-          <details className="recipe-card__steps" onClick={(event) => event.stopPropagation()}>
-            <summary>Steps</summary>
-            <ol>
-              {recipe.steps.map((step, index) => (
-                <li key={index}>{step}</li>
-              ))}
-            </ol>
-          </details>
-        )}
-
-        {isSelected && (
-          <p className="recipe-card__source">
-            {recipe.link ? (
-              <a
-                className="recipe-source-link"
-                href={recipe.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(event) => event.stopPropagation()}
-              >
-                View original recipe
-              </a>
-            ) : (
-              <span className="recipe-source-link recipe-source-link--none">View original recipe</span>
-            )}
-          </p>
-        )}
+        <details className="recipe-card__steps" onClick={(event) => event.stopPropagation()}>
+          <summary>Steps</summary>
+          <ol>
+            {recipe.steps.map((step, index) => (
+              <li key={index}>{step}</li>
+            ))}
+          </ol>
+        </details>
       </div>
     </article>
   )

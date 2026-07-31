@@ -2,6 +2,7 @@ import { useState } from 'react'
 import IngredientTag from './IngredientTag.jsx'
 import AddIngredientForm from './AddIngredientForm.jsx'
 import RestoreModal from './RestoreModal.jsx'
+import RecipeFilters from './RecipeFilters.jsx'
 import { ingredientCategoryOrder } from '../data/recipes.js'
 
 export default function PantryPanel({
@@ -17,10 +18,14 @@ export default function PantryPanel({
   hiddenIngredients,
   onRestoreHidden,
   onRestoreOneIngredient,
+  showFilters,
+  filtersProps,
 }) {
-  const [openCategories, setOpenCategories] = useState(() => new Set(ingredientCategoryOrder))
+  const [openCategories, setOpenCategories] = useState(() => new Set(['Protein']))
   const [isEditing, setIsEditing] = useState(false)
   const [isRestoreOpen, setIsRestoreOpen] = useState(false)
+  const [isAdding, setIsAdding] = useState(false)
+  const [isFiltersOpen, setIsFiltersOpen] = useState(true)
 
   function toggleCategory(category) {
     setOpenCategories((current) => {
@@ -47,17 +52,17 @@ export default function PantryPanel({
     }))
     .filter((group) => group.items.length > 0)
 
+  function addIngredient(key) {
+    onAddIngredient(key)
+    setIsAdding(false)
+  }
+
   return (
     <div className="pantry-panel__content">
       <div className="pantry-panel__header">
         <p className="eyebrow">The Pantry</p>
         <h2>What do you have?</h2>
         <div className="pantry-panel__actions">
-          {selectedIngredients.size > 0 && (
-            <button type="button" className="text-button" onClick={onClearSelected}>
-              Clear selected ({selectedIngredients.size})
-            </button>
-          )}
           {removedCount > 0 && (
             <button type="button" className="text-button" onClick={() => setIsRestoreOpen(true)}>
               Restore hidden ({removedCount})
@@ -79,6 +84,27 @@ export default function PantryPanel({
         />
       )}
 
+      {showFilters && (
+        <div className="pantry-panel__filters-section">
+          <button
+            type="button"
+            className="ingredient-category__header"
+            aria-expanded={isFiltersOpen}
+            onClick={() => setIsFiltersOpen((current) => !current)}
+          >
+            <span className="ingredient-category__chevron" data-open={isFiltersOpen ? 'true' : 'false'}>
+              ▸
+            </span>
+            <span className="ingredient-category__name">Filters</span>
+          </button>
+          <div className="collapsible" data-open={isFiltersOpen ? 'true' : 'false'}>
+            <div className="collapsible__inner">
+              <RecipeFilters {...filtersProps} />
+            </div>
+          </div>
+        </div>
+      )}
+
       <input
         type="search"
         className="pantry-panel__search"
@@ -87,6 +113,12 @@ export default function PantryPanel({
         onChange={(event) => onSearchTermChange(event.target.value)}
         aria-label="Search ingredients"
       />
+
+      {selectedIngredients.size > 0 && (
+        <button type="button" className="text-button pantry-panel__edit-toggle" onClick={onClearSelected}>
+          Clear selected ingredients ({selectedIngredients.size})
+        </button>
+      )}
 
       <div className="ingredient-categories">
         {categorized.length === 0 && (
@@ -108,30 +140,43 @@ export default function PantryPanel({
                 <span className="ingredient-category__name">{category}</span>
                 <span className="ingredient-category__count">{items.length}</span>
               </button>
-              {isOpen && (
-                <div className="ingredient-list">
-                  {items.map((ingredient) => (
-                    <IngredientTag
-                      key={ingredient.key}
-                      label={ingredient.label}
-                      selected={selectedIngredients.has(ingredient.key)}
-                      editable={isEditing}
-                      onToggle={() => onToggleIngredient(ingredient.key)}
-                      onRemove={() => onRemoveIngredient(ingredient.key)}
-                    />
-                  ))}
+              <div className="collapsible" data-open={isOpen ? 'true' : 'false'}>
+                <div className="collapsible__inner">
+                  <div className="ingredient-list">
+                    {items.map((ingredient) => (
+                      <IngredientTag
+                        key={ingredient.key}
+                        label={ingredient.label}
+                        selected={selectedIngredients.has(ingredient.key)}
+                        editable={isEditing}
+                        onToggle={() => onToggleIngredient(ingredient.key)}
+                        onRemove={() => onRemoveIngredient(ingredient.key)}
+                      />
+                    ))}
+                  </div>
                 </div>
-              )}
+              </div>
             </div>
           )
         })}
       </div>
 
-      <button type="button" className="text-button pantry-panel__edit-toggle" onClick={() => setIsEditing((current) => !current)}>
-        {isEditing ? 'Done editing' : 'Edit'}
-      </button>
-
-      <AddIngredientForm existingKeys={existingKeys} onAdd={onAddIngredient} />
+      {isAdding ? (
+        <AddIngredientForm existingKeys={existingKeys} onAdd={addIngredient} onCancel={() => setIsAdding(false)} />
+      ) : (
+        <div className="pantry-panel__footer-row">
+          <button type="button" className="text-button pantry-panel__edit-toggle" onClick={() => setIsAdding(true)}>
+            + Add an ingredient
+          </button>
+          <button
+            type="button"
+            className="text-button pantry-panel__edit-toggle"
+            onClick={() => setIsEditing((current) => !current)}
+          >
+            {isEditing ? 'Done editing' : 'Edit'}
+          </button>
+        </div>
+      )}
     </div>
   )
 }
