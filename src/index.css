@@ -174,7 +174,7 @@ input {
 }
 
 .app-header__subtitle {
-  color: #b5606f;
+  color: #000000;
   margin: 0 0 1.5rem;
   font-size: 0.95rem;
 }
@@ -776,10 +776,11 @@ input {
 .recipe-name-list__item {
   display: flex;
   align-items: center;
+  justify-content: space-between;
 }
 
 .recipe-name-list__button {
-  flex: 1;
+  flex: none;
   text-align: left;
   background: none;
   border: none;
@@ -1024,7 +1025,6 @@ input {
   align-items: flex-end;
   flex-wrap: wrap;
   gap: 1rem;
-  margin-bottom: 1rem;
   text-align: center;
   animation: content-fade-in 0.2s ease;
 }
