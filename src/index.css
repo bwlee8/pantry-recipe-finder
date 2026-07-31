@@ -282,8 +282,8 @@ input {
   border-radius: var(--radius-card);
   padding: 1.5rem;
   position: sticky;
-  top: 4.4375rem;
-  max-height: calc(100vh - 4.4375rem - 1.5rem);
+  top: 2.4375rem;
+  max-height: calc(100vh - 2.4375rem - 1.5rem);
   overflow-y: auto;
   overscroll-behavior: none;
   scrollbar-width: thin;
