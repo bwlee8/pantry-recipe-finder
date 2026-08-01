@@ -36,16 +36,16 @@
 
 :root {
   --color-page-bg: #ffffff;
-  --color-bg: #1c2820;
-  --color-bg-alt: #24352b;
+  --color-bg: #002B00;
+  --color-bg-alt: #002B00;
   --color-paper: #faf6ee;
   --color-ink: #2b2420;
   --color-ink-dim: #6b6255;
   --color-chalk: #f2ece0;
   --color-chalk-dim: #b3a999;
-  --color-mustard: #b5606f;
+  --color-mustard: #f4c858;
   --color-brick: #c1432b;
-  --color-sage: #7fa06e;
+  --color-sage: #002B00;
   --color-stamp-partial: #9c8465;
 
   --font-display: 'Larsseit', sans-serif;
@@ -307,7 +307,7 @@ input {
   overflow-y: auto;
   overscroll-behavior: none;
   scrollbar-width: thin;
-  scrollbar-color: #b5606f transparent;
+  scrollbar-color: #f4c858 transparent;
 }
 
 .pantry-panel::-webkit-scrollbar {
@@ -318,7 +318,7 @@ input {
   margin: 12px 0;
 }
 .pantry-panel::-webkit-scrollbar-thumb {
-  background-color: #b5606f;
+  background-color: #f4c858;
   border-radius: 0;
 }
 
@@ -607,8 +607,8 @@ input {
   color: var(--color-ink);
 }
 .sidebar-tabs__tab[data-active='true'] {
-  color: var(--color-mustard);
-  border-bottom-color: var(--color-mustard);
+  color: #002B00;
+  border-bottom-color: #002B00;
 }
 
 @media (max-width: 860px) {
@@ -673,7 +673,7 @@ input {
     margin-bottom: 0;
   }
   .sidebar-tabs__tab--mobile[data-active='true'] {
-    border-bottom-color: var(--color-mustard);
+    border-bottom-color: #002B00;
   }
 }
 
@@ -997,7 +997,7 @@ input {
 .add-recipe-form__actions button[type='submit'] {
   background: var(--color-sage);
   border: none;
-  color: var(--color-ink);
+  color: var(--color-chalk);
   font-weight: 600;
   padding: 0.5rem 1rem;
   border-radius: 4px;
@@ -1027,6 +1027,10 @@ input {
   gap: 1rem;
   text-align: center;
   animation: content-fade-in 0.2s ease;
+}
+
+.recipe-box__header .eyebrow {
+  color: #002B00;
 }
 
 .recipe-box__header h2 {
@@ -1271,7 +1275,7 @@ input {
 .recipe-detail__mark-cooked {
   background: var(--color-sage);
   border: none;
-  color: var(--color-ink);
+  color: var(--color-chalk);
   font-weight: 600;
   padding: 0.55rem 1rem;
   border-radius: 4px;
